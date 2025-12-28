@@ -1,0 +1,7 @@
+{
+  "name": "Saswata Dey - 3D Portfolio",
+  "description": "An elegant, professional 3D portfolio for Saswata Dey, featuring interactive 3D scrolling, dark mode, and a Gemini-powered conversational AI assistant.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
