@@ -1,101 +1,131 @@
 
 import React, { useState, useEffect, Suspense, useRef } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { ScrollControls, Scroll, Float, Environment, Stars, MeshDistortMaterial, Sphere, useScroll, Html, ContactShadows, Sparkles, Torus, Octahedron, Box, Ring, Float as FloatDrei } from '@react-three/drei';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  ScrollView, 
+  TouchableOpacity, 
+  Image, 
+  Dimensions, 
+  SafeAreaView, 
+  StatusBar,
+  Animated,
+  TextInput,
+  Linking
+} from 'react-native';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { Float, Environment, Stars, MeshDistortMaterial, Sphere, Html, Sparkles, Torus, Octahedron, Box, Ring } from '@react-three/drei';
 import * as THREE from 'three';
-import { Github, Mail, Phone, MapPin, Moon, Sun, MessageSquare, Terminal, Code, ShieldCheck, Zap, Wand2, Sword, Target, Flame } from 'lucide-react';
+import { 
+  Github, 
+  Mail, 
+  Zap, 
+  Wand2, 
+  Target, 
+  Flame, 
+  Scan, 
+  ExternalLink,
+  MessageSquare,
+  User,
+  LayoutGrid,
+  MapPin,
+  Music,
+  Search,
+  X,
+  Play
+} from 'lucide-react';
 import { RESUME_DATA } from './constants';
 import { LiveAIAgent } from './components/LiveAIAgent';
 
-// --- THEMED 3D COMPONENTS ---
+const { width, height } = Dimensions.get('window');
 
-const Omnitrix: React.FC<{ position: [number, number, number] }> = ({ position }) => (
-  <group position={position}>
-    <Float speed={3} rotationIntensity={2} floatIntensity={1}>
-      <Torus args={[0.7, 0.2, 16, 100]}>
-        <meshStandardMaterial color="#00ff00" emissive="#00ff00" emissiveIntensity={2} wireframe />
-      </Torus>
-      <Sphere args={[0.4, 32, 32]}>
-        <meshStandardMaterial color="#111" metalness={1} roughness={0} />
-      </Sphere>
-      <Ring args={[0.45, 0.5, 4, 1]} rotation={[0, 0, Math.PI / 4]}>
-        <meshStandardMaterial color="#00ff00" emissive="#00ff00" emissiveIntensity={5} />
-      </Ring>
-    </Float>
-    <Sparkles count={50} scale={2} size={2} color="#00ff00" />
-  </group>
-);
+// --- 3D MOBILE COMPONENTS ---
 
-const GoldenSnitch: React.FC<{ position: [number, number, number] }> = ({ position }) => {
-  const wingRef = useRef<THREE.Group>(null!);
+const SonicCore: React.FC<{ position: [number, number, number], active: boolean }> = ({ position, active }) => {
+  const meshRef = useRef<THREE.Group>(null!);
+  
   useFrame((state) => {
-    wingRef.current.rotation.z = Math.sin(state.clock.getElapsedTime() * 20) * 0.5;
+    const time = state.clock.getElapsedTime();
+    if (meshRef.current) {
+      meshRef.current.position.y = position[1] + Math.sin(time * 0.8) * 0.2;
+      meshRef.current.rotation.y += active ? 0.05 : 0.01;
+      meshRef.current.scale.setScalar(active ? 1.2 + Math.sin(time * 10) * 0.05 : 1);
+    }
   });
+
   return (
-    <group position={position}>
-      <Float speed={5} floatIntensity={2}>
-        <Sphere args={[0.2, 32, 32]}>
-          <meshStandardMaterial color="#ffd700" metalness={1} roughness={0.1} emissive="#ffd700" emissiveIntensity={0.5} />
+    <group ref={meshRef} position={position}>
+      <Float speed={4} rotationIntensity={active ? 5 : 1} floatIntensity={1}>
+        <Sphere args={[0.6, 64, 64]}>
+          <meshStandardMaterial 
+            color={active ? "#a855f7" : "#3b82f6"} 
+            emissive={active ? "#a855f7" : "#3b82f6"} 
+            emissiveIntensity={active ? 10 : 2} 
+            wireframe 
+          />
         </Sphere>
-        <group ref={wingRef}>
-          <Box args={[1.5, 0.02, 0.3]} position={[0.8, 0, 0]} rotation={[0, -0.5, 0]}>
-            <meshStandardMaterial color="#fff" transparent opacity={0.4} />
-          </Box>
-          <Box args={[1.5, 0.02, 0.3]} position={[-0.8, 0, 0]} rotation={[0, 0.5, 0]}>
-            <meshStandardMaterial color="#fff" transparent opacity={0.4} />
-          </Box>
-        </group>
+        <Torus args={[1, 0.02, 16, 100]} rotation={[Math.PI / 2, 0, 0]}>
+          <meshStandardMaterial color="#fff" transparent opacity={0.3} />
+        </Torus>
+      </Float>
+      <Sparkles count={active ? 100 : 20} scale={3} size={active ? 4 : 2} color={active ? "#a855f7" : "#ffffff"} />
+    </group>
+  );
+};
+
+const ProfileHologram: React.FC<{ position: [number, number, number] }> = ({ position }) => {
+  const meshRef = useRef<THREE.Group>(null!);
+  
+  useFrame((state) => {
+    const time = state.clock.getElapsedTime();
+    if (meshRef.current) {
+      meshRef.current.position.y = position[1] + Math.sin(time * 0.5) * 0.15;
+      meshRef.current.rotation.y = Math.sin(time * 0.2) * 0.05;
+    }
+  });
+
+  return (
+    <group ref={meshRef} position={position}>
+      <Float speed={2} rotationIntensity={0.2} floatIntensity={0.5}>
+        <Box args={[2.5, 3.5, 0.1]} position={[0, 0, -0.1]}>
+          <meshStandardMaterial color="#000" metalness={1} roughness={0} />
+        </Box>
+        <Torus args={[2.2, 0.005, 16, 100]} rotation={[Math.PI / 2, 0, 0]}>
+          <meshStandardMaterial color="#0ea5e9" emissive="#0ea5e9" emissiveIntensity={5} transparent opacity={0.2} />
+        </Torus>
+        <Html transform distanceFactor={5.5} position={[0, 0, 0.05]}>
+          <View style={styles.hologramContainer}>
+            <Image 
+              source={{ uri: 'https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=800&auto=format&fit=crop' }} 
+              style={styles.hologramImage}
+            />
+            {/* Using className for the animation defined in index.html */}
+            <div className="scan-line" />
+            <View style={styles.hologramOverlay}>
+              <View style={styles.hologramHeader}>
+                <Scan size={12} color="#3b82f6" />
+                <Text style={styles.hologramID}>ID: 022-SD</Text>
+              </View>
+              <View style={styles.hologramFooter}>
+                <Text style={styles.hologramName}>SASWATA DEY</Text>
+                <Text style={styles.hologramRole}>ARCHITECT</Text>
+              </View>
+            </View>
+          </View>
+        </Html>
       </Float>
     </group>
   );
 };
 
-const CaptainShield: React.FC<{ position: [number, number, number] }> = ({ position }) => (
-  <group position={position} rotation={[Math.PI / 2, 0, 0]}>
-    <Float speed={2} rotationIntensity={1}>
-      <Torus args={[0.8, 0.1, 16, 100]}>
-        <meshStandardMaterial color="#b91c1c" metalness={0.8} roughness={0.2} />
-      </Torus>
-      <Torus args={[0.65, 0.1, 16, 100]}>
-        <meshStandardMaterial color="#f3f4f6" metalness={0.8} roughness={0.2} />
-      </Torus>
-      <Torus args={[0.5, 0.1, 16, 100]}>
-        <meshStandardMaterial color="#b91c1c" metalness={0.8} roughness={0.2} />
-      </Torus>
-      <Sphere args={[0.4, 32, 32]} scale={[1, 1, 0.2]}>
-        <meshStandardMaterial color="#1d4ed8" metalness={0.8} roughness={0.2} />
-      </Sphere>
-      <Octahedron args={[0.2]} position={[0, 0, 0.1]}>
-        <meshStandardMaterial color="#fff" emissive="#fff" emissiveIntensity={1} />
-      </Octahedron>
-    </Float>
-  </group>
-);
-
-const ArcReactor: React.FC<{ position: [number, number, number] }> = ({ position }) => (
-  <group position={position}>
-    <Float speed={4} floatIntensity={0.5}>
-      <Torus args={[0.6, 0.05, 16, 100]}>
-        <meshStandardMaterial color="#0ea5e9" emissive="#0ea5e9" emissiveIntensity={2} />
-      </Torus>
-      <Ring args={[0.3, 0.5, 8]}>
-        <meshStandardMaterial color="#0ea5e9" emissive="#0ea5e9" emissiveIntensity={1} transparent opacity={0.5} />
-      </Ring>
-      <Sphere args={[0.15, 32, 32]}>
-        <meshStandardMaterial color="#fff" emissive="#fff" emissiveIntensity={5} />
-      </Sphere>
-    </Float>
-    <Sparkles count={30} scale={1.5} size={3} color="#0ea5e9" />
-  </group>
-);
-
 const SupermanCore: React.FC<{ position: [number, number, number] }> = ({ position }) => (
   <group position={position}>
     <Float speed={1.5} rotationIntensity={2}>
-      <Octahedron args={[1]}>
+      <Octahedron args={[0.8]}>
         <meshStandardMaterial color="#1d4ed8" metalness={0.9} roughness={0.1} />
       </Octahedron>
-      <Ring args={[0.8, 1.1, 3, 1]} rotation={[0, 0, Math.PI]}>
+      <Ring args={[0.7, 0.9, 3, 1]} rotation={[0, 0, Math.PI]}>
         <meshStandardMaterial color="#dc2626" emissive="#dc2626" emissiveIntensity={2} />
       </Ring>
     </Float>
@@ -104,96 +134,77 @@ const SupermanCore: React.FC<{ position: [number, number, number] }> = ({ positi
 
 const StrangerPortal: React.FC<{ position: [number, number, number] }> = ({ position }) => (
   <group position={position}>
-    <Sphere args={[1.5, 64, 64]}>
-      <MeshDistortMaterial color="#220000" speed={4} distort={0.7} emissive="#ff0000" emissiveIntensity={0.3} />
+    <Sphere args={[2, 64, 64]}>
+      <MeshDistortMaterial color="#1a0000" speed={5} distort={0.6} emissive="#440000" emissiveIntensity={0.5} />
     </Sphere>
-    <Sparkles count={100} scale={4} size={4} color="#ff0000" speed={2} />
+    <Sparkles count={150} scale={5} size={4} color="#ff3333" speed={1.2} />
   </group>
 );
 
-const PowerTotem: React.FC<{ position: [number, number, number]; color: string }> = ({ position, color }) => (
-  <group position={position}>
-    <Float speed={3} rotationIntensity={3}>
-      <Box args={[0.6, 0.6, 0.6]}>
-        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.8} />
-      </Box>
-      <Torus args={[0.8, 0.02, 16, 100]} rotation={[Math.PI / 2, 0, 0]}>
-        <meshStandardMaterial color={color} transparent opacity={0.5} />
-      </Torus>
-    </Float>
-  </group>
-);
+const MusicSearchModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+  const [query, setQuery] = useState('');
+  const [platforms] = useState([
+    { name: 'Spotify', color: '#1DB954', url: 'https://open.spotify.com/search/' },
+    { name: 'Apple Music', color: '#FC3C44', url: 'https://music.apple.com/search?term=' },
+    { name: 'YouTube Music', color: '#FF0000', url: 'https://music.youtube.com/search?q=' },
+    { name: 'JioSaavn', color: '#00d08d', url: 'https://www.jiosaavn.com/search/' },
+    { name: 'Gaana', color: '#e72c33', url: 'https://gaana.com/search/' },
+    { name: 'Amazon Music', color: '#00A8E1', url: 'https://music.amazon.com/search/' },
+  ]);
 
-// --- SCENE & CAMERA ---
-
-const MultiverseScene: React.FC = () => {
-  const scroll = useScroll();
-  const { camera } = useThree();
-  const sceneRef = useRef<THREE.Group>(null!);
-
-  useFrame((state) => {
-    const offset = scroll.offset; // 0 to 1
-    
-    // Smooth camera path through the multiverse
-    camera.position.x = Math.sin(offset * Math.PI) * 4;
-    camera.position.z = 8 + Math.cos(offset * Math.PI) * 2;
-    camera.position.y = -offset * 30; // Move down as we scroll
-    camera.lookAt(0, -offset * 30 - 2, 0);
-
-    if (sceneRef.current) {
-      sceneRef.current.rotation.y = offset * 0.2;
-    }
-  });
+  const handleSearch = (platformUrl: string) => {
+    if (!query.trim()) return;
+    const fullUrl = platformUrl + encodeURIComponent(query);
+    Linking.openURL(fullUrl).catch(err => console.error("Couldn't load page", err));
+  };
 
   return (
-    <group ref={sceneRef}>
-      <Environment preset="night" />
-      <Stars radius={100} depth={50} count={7000} factor={4} saturation={1} fade speed={1} />
-      
-      {/* Superman/Justice League Zone (Hero Section) */}
-      <SupermanCore position={[0, 0, -2]} />
-      <Sparkles count={100} scale={10} size={1} color="#ffffff" />
-      
-      {/* Ben 10 / Potter Zone (Expertise Section) */}
-      <Omnitrix position={[-4, -7, -4]} />
-      <GoldenSnitch position={[4, -10, -3]} />
-      
-      {/* Avengers Zone (Experience Section) */}
-      <CaptainShield position={[-5, -18, -5]} />
-      <ArcReactor position={[5, -22, -4]} />
-      <Sphere args={[2, 32, 32]} position={[0, -25, -10]}>
-        <meshStandardMaterial color="#166534" emissive="#166534" emissiveIntensity={0.2} wireframe />
-      </Sphere>
+    <View style={styles.modalOverlay}>
+      <View style={styles.modalContent}>
+        <View style={styles.modalHeader}>
+          <Text style={styles.modalTitle}>SONIC SEARCH</Text>
+          <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+            <X color="white" size={24} />
+          </TouchableOpacity>
+        </View>
 
-      {/* Stranger Things Zone (Projects Section) */}
-      <StrangerPortal position={[0, -35, -8]} />
-      
-      {/* Power Rangers Zone (Education/Contact Section) */}
-      <group position={[0, -45, -5]}>
-        <PowerTotem position={[-3, 0, 0]} color="#ef4444" />
-        <PowerTotem position={[-1.5, 1, 0]} color="#3b82f6" />
-        <PowerTotem position={[0, 2, 0]} color="#10b981" />
-        <PowerTotem position={[1.5, 1, 0]} color="#f59e0b" />
-        <PowerTotem position={[3, 0, 0]} color="#ec4899" />
-      </group>
-      
-      <ContactShadows opacity={0.5} scale={30} blur={2} far={10} />
-    </group>
+        <View style={styles.searchContainer}>
+          <Search color="#666" size={20} style={styles.searchIcon} />
+          <TextInput
+            placeholder="Search song, artist, or dimension..."
+            placeholderTextColor="#444"
+            style={styles.searchInput}
+            value={query}
+            onChangeText={setQuery}
+          />
+        </View>
+
+        <Text style={styles.platformLabel}>CHOOSE YOUR STREAMING REALM</Text>
+        
+        <View style={styles.platformGrid}>
+          {platforms.map((p, i) => (
+            <TouchableOpacity 
+              key={i} 
+              style={[styles.platformCard, { borderColor: p.color + '44' }]}
+              onPress={() => handleSearch(p.url)}
+            >
+              <View style={[styles.platformIndicator, { backgroundColor: p.color }]} />
+              <Text style={styles.platformName}>{p.name}</Text>
+              <Play size={12} color={p.color} fill={p.color} />
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+    </View>
   );
 };
 
-// --- UI COMPONENTS ---
-
-const MultiverseSection: React.FC<{ children: React.ReactNode; className?: string; id?: string }> = ({ children, className = "", id }) => (
-  <section id={id} className={`min-h-screen flex flex-col justify-center px-6 md:px-24 py-20 relative z-10 transition-all duration-700 ${className}`}>
-    {children}
-  </section>
-);
-
 const App: React.FC = () => {
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [activeTab, setActiveTab] = useState('hero');
   const [showVoiceAgent, setShowVoiceAgent] = useState(false);
+  const [showMusicSearch, setShowMusicSearch] = useState(false);
   const [repos, setRepos] = useState<any[]>([]);
+  const scrollY = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     fetch('https://api.github.com/users/codgamerofficial/repos?sort=updated&per_page=6')
@@ -203,202 +214,574 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <div className={`relative min-h-screen overflow-hidden ${isDarkMode ? 'bg-black text-white' : 'bg-slate-50 text-slate-900'}`}>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" />
       
-      {/* 3D CANVAS LAYER */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <Canvas shadows camera={{ fov: 45 }}>
+      {/* 3D BACKGROUND LAYER */}
+      <View style={StyleSheet.absoluteFill}>
+        <Canvas camera={{ position: [0, 0, 8], fov: 45 }}>
           <Suspense fallback={null}>
-            <ScrollControls pages={7} damping={0.2}>
-              <MultiverseScene />
-              <Scroll html>
-                <div className="w-screen pointer-events-auto">
-                  
-                  {/* HERO: Superman/Justice League Theme */}
-                  <MultiverseSection className="items-start">
-                    <div className="max-w-4xl space-y-6">
-                      <div className="inline-block px-4 py-2 rounded-full bg-blue-600/20 border border-blue-500/50 backdrop-blur-md animate-pulse">
-                        <span className="text-xs font-black tracking-[0.3em] uppercase text-blue-400">Guardian of the Code • Multiverse Resident</span>
-                      </div>
-                      <h1 className="text-7xl md:text-9xl font-black leading-none tracking-tighter">
-                        <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-red-500 to-yellow-500">SASWATA</span>
-                        <span className="block opacity-40 ml-4 font-light italic">The Architect</span>
-                      </h1>
-                      <p className="text-xl md:text-2xl text-gray-400 font-medium max-w-2xl leading-relaxed">
-                        Defending digital systems with <span className="text-white">Supersonic QA Automation</span> and navigating terrains with <span className="text-blue-500">GIS Spatial Intelligence</span>.
-                      </p>
-                      <div className="flex gap-4 pt-6">
-                        <button className="px-10 py-5 bg-blue-600 hover:bg-blue-700 rounded-2xl font-black uppercase tracking-widest transition-all hover:scale-110 shadow-[0_0_30px_rgba(37,99,235,0.4)]">
-                          View Missions
-                        </button>
-                        <button className="px-10 py-5 border-2 border-white/10 hover:bg-white/5 rounded-2xl font-black uppercase tracking-widest transition-all">
-                          Contact Base
-                        </button>
-                      </div>
-                    </div>
-                  </MultiverseSection>
-
-                  {/* EXPERTISE: Ben 10 / Potter Theme */}
-                  <MultiverseSection id="skills" className="items-end text-right">
-                    <div className="max-w-4xl space-y-12">
-                      <div>
-                        <h2 className="text-6xl md:text-8xl font-black tracking-tighter flex items-center justify-end gap-6">
-                          <Zap className="text-green-500" size={60} />
-                          EXPERTISE
-                        </h2>
-                        <div className="h-1.5 w-48 bg-green-500 ml-auto mt-4"></div>
-                      </div>
-                      <div className="grid md:grid-cols-2 gap-8">
-                        {[
-                          { title: "Manual Mastery", icon: <Target />, color: "text-red-500", desc: "Surgical precision in defect detection and system analysis." },
-                          { title: "Arcane Automation", icon: <Wand2 />, color: "text-yellow-500", desc: "Casting Selenium scripts to weave seamless test execution." },
-                          { title: "Spatial Sorcery", icon: <MapPin />, color: "text-green-500", desc: "Transmuting GIS data into powerful 3D terrains." },
-                          { title: "Omni-Intelligence", icon: <Zap />, color: "text-blue-500", desc: "Multi-modality problem solving across the SDLC." }
-                        ].map((skill, i) => (
-                          <div key={i} className="p-8 rounded-[2rem] bg-white/5 border border-white/10 hover:border-green-500/50 backdrop-blur-xl transition-all group">
-                            <div className={`${skill.color} mb-6 group-hover:scale-125 transition-transform inline-block`}>{skill.icon}</div>
-                            <h3 className="text-2xl font-bold mb-3">{skill.title}</h3>
-                            <p className="text-gray-500 text-sm">{skill.desc}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </MultiverseSection>
-
-                  {/* EXPERIENCE: Avengers Theme */}
-                  <MultiverseSection>
-                    <div className="max-w-5xl">
-                      <h2 className="text-6xl md:text-8xl font-black mb-20 tracking-tighter flex items-center gap-6">
-                        <Sword className="text-blue-500" />
-                        TIMELINE
-                      </h2>
-                      <div className="space-y-32">
-                        {RESUME_DATA.experience.map((exp, i) => (
-                          <div key={i} className="relative pl-12 border-l-4 border-blue-600/30 group">
-                            <div className="absolute -left-[14px] top-0 w-6 h-6 rounded-full bg-blue-600 shadow-[0_0_20px_rgba(37,99,235,1)] group-hover:scale-150 transition-all"></div>
-                            <div className="mb-2 flex items-center gap-4">
-                              <span className="text-blue-500 font-black tracking-widest text-sm bg-blue-500/10 px-3 py-1 rounded-lg uppercase">{exp.period}</span>
-                              <h3 className="text-4xl font-black text-white group-hover:translate-x-4 transition-transform">{exp.company}</h3>
-                            </div>
-                            <h4 className="text-xl text-gray-400 font-bold mb-6">{exp.role}</h4>
-                            <ul className="grid md:grid-cols-2 gap-4">
-                              {exp.description.map((item, j) => (
-                                <li key={j} className="text-gray-500 text-sm bg-white/5 p-4 rounded-xl border border-white/5 leading-relaxed">
-                                  {item}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </MultiverseSection>
-
-                  {/* PROJECTS: Stranger Things Theme */}
-                  <MultiverseSection id="projects" className="bg-gradient-to-b from-transparent via-red-950/20 to-transparent">
-                    <div className="max-w-6xl">
-                      <div className="mb-16">
-                        <h2 className="text-6xl md:text-8xl font-black tracking-tighter text-red-600 drop-shadow-[0_0_15px_rgba(220,38,38,0.5)]">LABS</h2>
-                        <p className="text-gray-500 mt-2 text-xl font-bold italic">Incidents from the Upside Down...</p>
-                      </div>
-                      <div className="grid md:grid-cols-3 gap-6">
-                        {repos.map((repo, i) => (
-                          <a 
-                            key={i} 
-                            href={repo.html_url} 
-                            target="_blank" 
-                            className="group relative p-10 rounded-[2.5rem] bg-black border-2 border-red-900/30 hover:border-red-600 transition-all overflow-hidden"
-                          >
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/10 rounded-full blur-3xl group-hover:bg-red-600/20 transition-all"></div>
-                            <h3 className="text-2xl font-black mb-4 group-hover:text-red-500 transition-colors uppercase">{repo.name}</h3>
-                            <p className="text-gray-500 text-sm line-clamp-3 mb-8 h-12 leading-relaxed">{repo.description || "Experimental classified project files."}</p>
-                            <div className="flex items-center justify-between text-xs font-black tracking-tighter text-gray-400">
-                              <span className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-red-600"></div> {repo.language || "Classified"}</span>
-                              <span className="px-3 py-1 bg-white/5 rounded-md">★ {repo.stargazers_count}</span>
-                            </div>
-                          </a>
-                        ))}
-                      </div>
-                    </div>
-                  </MultiverseSection>
-
-                  {/* CONTACT: Power Rangers / Final Theme */}
-                  <MultiverseSection id="contact" className="items-center text-center">
-                    <div className="max-w-4xl space-y-12">
-                      <div className="space-y-4">
-                        <Flame className="mx-auto text-orange-500" size={60} />
-                        <h2 className="text-7xl md:text-9xl font-black tracking-tighter">CALL TO ARMS</h2>
-                        <p className="text-2xl text-gray-500 font-medium italic">"The world needs heroes. The digital world needs QA."</p>
-                      </div>
-                      
-                      <div className="grid md:grid-cols-2 gap-8 w-full">
-                        <a href={`mailto:${RESUME_DATA.email}`} className="group p-10 rounded-[3rem] bg-blue-600 hover:bg-blue-700 transition-all hover:scale-105 shadow-2xl shadow-blue-500/20">
-                          <Mail size={40} className="mb-6 mx-auto" />
-                          <div className="text-3xl font-black uppercase">Beam Message</div>
-                          <div className="text-blue-200 mt-2 font-medium">{RESUME_DATA.email}</div>
-                        </a>
-                        <a href={`tel:${RESUME_DATA.phone}`} className="group p-10 rounded-[3rem] bg-white text-black hover:scale-105 transition-all shadow-2xl">
-                          <Phone size={40} className="mb-6 mx-auto" />
-                          <div className="text-3xl font-black uppercase">Signal Trace</div>
-                          <div className="text-gray-600 mt-2 font-medium">{RESUME_DATA.phone}</div>
-                        </a>
-                      </div>
-
-                      <div className="pt-24 border-t border-white/10 w-full flex flex-col md:flex-row justify-between items-center gap-8">
-                        <p className="text-xs font-black tracking-[0.5em] text-gray-700 uppercase">© 2025 Saswata Dey • Multiverse Edition</p>
-                        <div className="flex gap-6">
-                           <a href={RESUME_DATA.github} className="p-4 bg-white/5 rounded-2xl hover:bg-blue-600 transition-all"><Github /></a>
-                           <button onClick={() => setShowVoiceAgent(true)} className="p-4 bg-blue-600 rounded-2xl animate-bounce shadow-xl shadow-blue-500/40"><MessageSquare /></button>
-                        </div>
-                      </div>
-                    </div>
-                  </MultiverseSection>
-
-                </div>
-              </Scroll>
-            </ScrollControls>
+            <Environment preset="night" />
+            <Stars radius={100} depth={50} count={2000} factor={4} saturation={1} fade speed={1} />
+            <group position={[0, 0, 0]}>
+              <SupermanCore position={[-2, 1, -2]} />
+              <ProfileHologram position={[1.5, -0.5, 0]} />
+              <SonicCore position={[3, 2, -1]} active={showMusicSearch} />
+              <StrangerPortal position={[0, -15, -5]} />
+            </group>
           </Suspense>
         </Canvas>
-      </div>
+      </View>
 
-      {/* FIXED UI OVERLAYS */}
-      <div className="fixed top-8 right-8 z-50 flex gap-4">
-        <button 
-          onClick={() => setIsDarkMode(!isDarkMode)}
-          className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl flex items-center justify-center hover:scale-110 transition-all"
-        >
-          {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
-        </button>
-      </div>
-
-      <div className="fixed bottom-8 left-8 z-50 pointer-events-none">
-        <div className="flex items-center gap-4 text-gray-500">
-          <div className="w-1.5 h-16 bg-gradient-to-b from-blue-600 to-transparent rounded-full animate-pulse"></div>
-          <span className="text-[10px] font-black uppercase tracking-[0.3em] rotate-180 [writing-mode:vertical-lr]">Scroll to Voyage</span>
-        </div>
-      </div>
-
-      <button 
-        onClick={() => setShowVoiceAgent(true)}
-        className="fixed bottom-8 right-8 z-50 group flex items-center gap-4 bg-white text-black px-8 py-5 rounded-[2rem] shadow-2xl hover:scale-105 active:scale-95 transition-all"
+      {/* MOBILE UI LAYER */}
+      <Animated.ScrollView 
+        style={styles.uiScroll}
+        contentContainerStyle={styles.uiContent}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: false }
+        )}
+        scrollEventThrottle={16}
       >
-        <div className="relative">
-          <Zap size={24} className="fill-current" />
-          <span className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full animate-ping"></span>
-        </div>
-        <span className="font-black uppercase tracking-widest text-sm">Summon Jervice</span>
-      </button>
+        <View style={styles.section}>
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>MULTIVERSE GUARDIAN</Text>
+          </View>
+          <Text style={styles.heroTitle}>SASWATA</Text>
+          <Text style={styles.heroSubtitle}>THE ARCHITECT</Text>
+          <Text style={styles.heroDesc}>
+            Deploying <Text style={styles.highlight}>QA Automation</Text> with superhuman speed and <Text style={styles.highlightBlue}>GIS Intelligence</Text> across digital dimensions.
+          </Text>
+          
+          <View style={styles.heroActions}>
+            <TouchableOpacity style={styles.primaryBtn}>
+              <Text style={styles.primaryBtnText}>MISSIONS</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.secondaryBtn}>
+              <Text style={styles.secondaryBtnText}>SIGNAL</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionHeader}>POWERS</Text>
+          <View style={styles.skillsGrid}>
+            {[
+              { title: "Manual", icon: <Target color="#ef4444" size={24} />, desc: "Precision Bug Detection" },
+              { title: "Arcane", icon: <Wand2 color="#f59e0b" size={24} />, desc: "Selenium Sorcery" },
+              { title: "Spatial", icon: <MapPin color="#10b981" size={24} />, desc: "GIS Manipulation" },
+              { title: "Omni", icon: <Zap color="#3b82f6" size={24} />, desc: "Full Stack Defense" }
+            ].map((skill, i) => (
+              <View key={i} style={styles.skillCard}>
+                <View style={styles.skillIcon}>{skill.icon}</View>
+                <Text style={styles.skillTitle}>{skill.title}</Text>
+                <Text style={styles.skillDesc}>{skill.desc}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionHeader}>TIMELINE</Text>
+          {RESUME_DATA.experience.map((exp, i) => (
+            <View key={i} style={styles.timelineItem}>
+              <View style={styles.timelineLine} />
+              <View style={styles.timelineDot} />
+              <View style={styles.timelineContent}>
+                <Text style={styles.timelinePeriod}>{exp.period}</Text>
+                <Text style={styles.timelineCompany}>{exp.company}</Text>
+                <Text style={styles.timelineRole}>{exp.role}</Text>
+                <View style={styles.timelineDesc}>
+                   {exp.description.map((d, j) => (
+                     <Text key={j} style={styles.timelineDescText}>• {d}</Text>
+                   ))}
+                </View>
+              </View>
+            </View>
+          ))}
+        </View>
+
+        <View style={styles.section}>
+          <Text style={[styles.sectionHeader, { color: '#dc2626' }]}>THE LABS</Text>
+          <View style={styles.labsGrid}>
+            {repos.map((repo, i) => (
+              <TouchableOpacity key={i} style={styles.labCard}>
+                <View style={styles.labHeader}>
+                   <Text style={styles.labName}>{repo.name}</Text>
+                   <ExternalLink size={16} color="#444" />
+                </View>
+                <Text style={styles.labDesc} numberOfLines={2}>{repo.description || 'Classified Research Files'}</Text>
+                <View style={styles.labFooter}>
+                   <View style={styles.labStatus} />
+                   <Text style={styles.labLang}>{repo.language || 'Artifact'}</Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        <View style={styles.footer}>
+          <Flame color="#f97316" size={48} />
+          <Text style={styles.footerText}>READY FOR DEPLOYMENT</Text>
+          <View style={styles.footerSocials}>
+            <TouchableOpacity style={styles.socialIcon}><Github color="white" /></TouchableOpacity>
+            <TouchableOpacity style={styles.socialIcon}><Mail color="white" /></TouchableOpacity>
+          </View>
+          <Text style={styles.copyright}>© 2025 Saswata Dey • Multiverse Native</Text>
+        </View>
+
+        <View style={{ height: 100 }} />
+      </Animated.ScrollView>
+
+      {/* MOBILE ACTION DOCK */}
+      <View style={styles.dock}>
+        <TouchableOpacity style={styles.dockItem} onPress={() => setActiveTab('hero')}>
+          <User size={20} color={activeTab === 'hero' ? '#3b82f6' : '#666'} />
+          <Text style={[styles.dockText, activeTab === 'hero' && styles.activeDockText]}>Hero</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.dockItem} onPress={() => setShowMusicSearch(true)}>
+          <Music size={20} color={showMusicSearch ? '#a855f7' : '#666'} />
+          <Text style={[styles.dockText, showMusicSearch && { color: '#a855f7' }]}>Music</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.dockMainItem} 
+          onPress={() => setShowVoiceAgent(true)}
+        >
+          <MessageSquare color="white" size={28} />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.dockItem} onPress={() => setActiveTab('labs')}>
+          <LayoutGrid size={20} color={activeTab === 'labs' ? '#3b82f6' : '#666'} />
+          <Text style={[styles.dockText, activeTab === 'labs' && styles.activeDockText]}>Labs</Text>
+        </TouchableOpacity>
+      </View>
 
       {showVoiceAgent && (
         <LiveAIAgent onClose={() => setShowVoiceAgent(false)} />
       )}
 
-      <style>{`
-        ::-webkit-scrollbar { display: none; }
-        * { scroll-behavior: smooth; }
-      `}</style>
-    </div>
+      {showMusicSearch && (
+        <MusicSearchModal onClose={() => setShowMusicSearch(false)} />
+      )}
+    </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
+  uiScroll: {
+    flex: 1,
+    zIndex: 10,
+  },
+  uiContent: {
+    paddingHorizontal: 24,
+  },
+  section: {
+    minHeight: height * 0.8,
+    justifyContent: 'center',
+    paddingVertical: 60,
+  },
+  badge: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.2)',
+    marginBottom: 20,
+  },
+  badgeText: {
+    color: '#3b82f6',
+    fontSize: 10,
+    fontWeight: '900',
+    letterSpacing: 2,
+  },
+  heroTitle: {
+    fontSize: 64,
+    fontWeight: '900',
+    color: 'white',
+    letterSpacing: -2,
+    lineHeight: 64,
+  },
+  heroSubtitle: {
+    fontSize: 32,
+    fontWeight: '200',
+    color: 'rgba(255,255,255,0.4)',
+    fontStyle: 'italic',
+    marginBottom: 24,
+  },
+  heroDesc: {
+    fontSize: 18,
+    color: '#999',
+    lineHeight: 28,
+  },
+  highlight: { color: 'white', fontWeight: 'bold' },
+  highlightBlue: { color: '#3b82f6', fontWeight: 'bold' },
+  heroActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 40,
+  },
+  primaryBtn: {
+    backgroundColor: '#2563eb',
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    borderRadius: 16,
+  },
+  primaryBtnText: {
+    color: 'white',
+    fontWeight: '900',
+    fontSize: 12,
+    letterSpacing: 2,
+  },
+  secondaryBtn: {
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  secondaryBtnText: {
+    color: 'white',
+    fontWeight: '900',
+    fontSize: 12,
+    letterSpacing: 2,
+  },
+  sectionHeader: {
+    fontSize: 48,
+    fontWeight: '900',
+    color: 'white',
+    letterSpacing: -2,
+    marginBottom: 20,
+  },
+  skillsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 16,
+  },
+  skillCard: {
+    width: '47%',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    padding: 24,
+    borderRadius: 32,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+  },
+  skillIcon: {
+    marginBottom: 16,
+  },
+  skillTitle: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  skillDesc: {
+    color: '#666',
+    fontSize: 12,
+    marginTop: 4,
+  },
+  timelineItem: {
+    flexDirection: 'row',
+    marginBottom: 48,
+  },
+  timelineLine: {
+    position: 'absolute',
+    left: 11,
+    top: 24,
+    bottom: -48,
+    width: 2,
+    backgroundColor: 'rgba(37, 99, 235, 0.1)',
+  },
+  timelineDot: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#2563eb',
+    borderWidth: 4,
+    borderColor: '#000',
+    zIndex: 2,
+  },
+  timelineContent: {
+    marginLeft: 20,
+    flex: 1,
+  },
+  timelinePeriod: {
+    color: '#3b82f6',
+    fontSize: 12,
+    fontWeight: '900',
+    marginBottom: 8,
+  },
+  timelineCompany: {
+    color: 'white',
+    fontSize: 24,
+    fontWeight: '900',
+  },
+  timelineRole: {
+    color: '#999',
+    fontSize: 16,
+    marginBottom: 16,
+  },
+  timelineDesc: {
+    backgroundColor: 'rgba(255,255,255,0.02)',
+    padding: 16,
+    borderRadius: 20,
+  },
+  timelineDescText: {
+    color: '#777',
+    fontSize: 13,
+    lineHeight: 20,
+    marginBottom: 4,
+  },
+  labsGrid: {
+    gap: 16,
+  },
+  labCard: {
+    backgroundColor: '#0a0a0a',
+    borderWidth: 1,
+    borderColor: 'rgba(220, 38, 38, 0.1)',
+    borderRadius: 32,
+    padding: 24,
+  },
+  labHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  labName: {
+    color: '#dc2626',
+    fontSize: 20,
+    fontWeight: '900',
+  },
+  labDesc: {
+    color: '#555',
+    fontSize: 14,
+    lineHeight: 22,
+    marginBottom: 20,
+  },
+  labFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  labStatus: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#dc2626',
+  },
+  labLang: {
+    color: '#444',
+    fontSize: 10,
+    fontWeight: '900',
+  },
+  footer: {
+    paddingVertical: 100,
+    alignItems: 'center',
+  },
+  footerText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: '900',
+    letterSpacing: 4,
+    marginTop: 20,
+    marginBottom: 40,
+  },
+  footerSocials: {
+    flexDirection: 'row',
+    gap: 20,
+    marginBottom: 40,
+  },
+  socialIcon: {
+    width: 60,
+    height: 60,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  copyright: {
+    color: '#333',
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+  dock: {
+    position: 'absolute',
+    bottom: 30,
+    left: 20,
+    right: 20,
+    height: 80,
+    backgroundColor: 'rgba(20, 20, 20, 0.9)',
+    borderRadius: 40,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+    zIndex: 100,
+  },
+  dockItem: {
+    alignItems: 'center',
+    width: 60,
+  },
+  dockMainItem: {
+    width: 70,
+    height: 70,
+    backgroundColor: '#2563eb',
+    borderRadius: 35,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: -40,
+  },
+  dockText: {
+    color: '#666',
+    fontSize: 8,
+    fontWeight: '900',
+    marginTop: 4,
+  },
+  activeDockText: {
+    color: '#3b82f6',
+  },
+  hologramContainer: {
+    width: 250,
+    height: 350,
+    backgroundColor: 'black',
+    borderRadius: 40,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(14, 165, 233, 0.2)',
+    position: 'relative'
+  },
+  hologramImage: {
+    width: '100%',
+    height: '100%',
+    opacity: 0.6,
+  },
+  hologramOverlay: {
+    position: 'absolute',
+    inset: 0,
+    padding: 20,
+    justifyContent: 'space-between',
+  },
+  hologramHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  hologramID: {
+    color: 'rgba(255,255,255,0.3)',
+    fontSize: 8,
+  },
+  hologramFooter: {
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    padding: 12,
+    borderRadius: 16,
+  },
+  hologramName: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: '900',
+  },
+  hologramRole: {
+    color: '#0ea5e9',
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+  modalOverlay: {
+    position: 'absolute',
+    inset: 0,
+    backgroundColor: 'rgba(0,0,0,0.95)',
+    zIndex: 1000,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    width: '100%',
+    maxWidth: 500,
+    backgroundColor: '#050505',
+    borderRadius: 40,
+    borderWidth: 1,
+    borderColor: 'rgba(168, 85, 247, 0.2)',
+    padding: 30,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 30,
+  },
+  modalTitle: {
+    color: 'white',
+    fontSize: 24,
+    fontWeight: '900',
+    letterSpacing: 4,
+  },
+  closeBtn: {
+    width: 44,
+    height: 44,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderRadius: 20,
+    paddingHorizontal: 20,
+    marginBottom: 40,
+  },
+  searchIcon: {
+    marginRight: 12,
+  },
+  searchInput: {
+    flex: 1,
+    height: 60,
+    color: 'white',
+    fontSize: 16,
+  },
+  platformLabel: {
+    color: '#444',
+    fontSize: 10,
+    fontWeight: '900',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  platformGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  platformCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.02)',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+    width: '48%',
+    justifyContent: 'space-between',
+  },
+  platformIndicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  platformName: {
+    color: '#ddd',
+    fontSize: 12,
+    fontWeight: 'bold',
+    flex: 1,
+    marginLeft: 10,
+  }
+});
 
 export default App;
